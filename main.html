@@ -137,21 +137,6 @@ const getRawAccountHistory = async (address, count, reverse) => {
     return body
 }
 
-const getLastChangeBlockTime = async (address) => {
-    const history = await getRawAccountHistory(address, 1000, "false")
-    for(let i in history.history) {
-        const block = history.history[i]
-        if (block.subtype !== "change") {
-            continue
-        }
-
-        const timestamp = Number(block.local_timestamp)
-        return timestamp
-    }
-    return 0
-    throw `Last change block could not be found for '${address}'`
-}
-
 const getAccountInfo = async (address) => {
     const response = await fetch(NODE_URL, {
         method: "POST",
@@ -177,9 +162,45 @@ const getBlockInfo = async (block) => {
     return body
 }
 
+const sendAmount = async (to, sendAddress, rawAmount) => {
+    const response = await fetch(NODE_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            "action": "send",
+            "wallet": WALLET,
+            "source": sendAddress,
+            "destination": to,
+            "amount": rawAmount,
+            "id": uuidv4()
+        })
+    })
+    const body = await response.json()
+
+    if ('error' in body) {
+        console.error(`An error occured when attempting to send amount '${JSON.stringify(body)}' maybe should have a retry and backoff`)
+    }
+    return body
+}
+
+
+
+const getLastChangeBlockTime = async (address) => {
+    const history = await getRawAccountHistory(address, 1000, "false")
+    for(let i in history.history) {
+        const block = history.history[i]
+        if (block.subtype !== "change") {
+            continue
+        }
+
+        const timestamp = Number(block.local_timestamp)
+        return timestamp
+    }
+    return 0
+    throw `Last change block could not be found for '${address}'`
+}
+
 const getAccountCreationTimestamp = async (address) => {
     const accountInfo = await getAccountInfo(address)
-    console.log(`MEEP ${accountInfo}`)
     const blockInfo = await getBlockInfo(accountInfo.open_block)
     return Number(blockInfo.local_timestamp)
 }
@@ -205,10 +226,7 @@ const getAverageBalance24Hours = async(address) => {
         }
 
         const timeDifference = timestamp - lastTransactionTime
-
         const balance = block.balance
-
-
     }
 }
 
@@ -257,9 +275,7 @@ const getAccountAverage = async(startingBal, from, to, blocks) => {
         })
     }
 
-
     let points = []
-
     for (let i in results) {
         const point = results[Number(i)]
         if (results.length == Number(i) + 1) {
@@ -276,8 +292,8 @@ const getAccountAverage = async(startingBal, from, to, blocks) => {
         const difference = point2.timestamp - point.timestamp
         const percOfDay = difference / SECONDS_IN_A_DAY
         points.push({
-                "balance": point.balance,
-                "perc_of_day": percOfDay
+            "balance": point.balance,
+            "perc_of_day": percOfDay
         })
     }
 
@@ -296,25 +312,7 @@ const uuidv4 = () => {
   );
 }
 
-const sendAmount = async (to, sendAddress, rawAmount) => {
-    const response = await fetch(NODE_URL, {
-        method: "POST",
-        body: JSON.stringify({
-            "action": "send",
-            "wallet": WALLET,
-            "source": sendAddress,
-            "destination": to,
-            "amount": rawAmount,
-            "id": uuidv4()
-        })
-    })
-    const body = await response.json()
 
-    if ('error' in body) {
-        console.error(`An error occured when attempting to send amount '${JSON.stringify(body)}' maybe should have a retry and backoff`)
-    }
-    return body
-}
 
 // HELPER METHODS
 const getRewards = async (history) => {

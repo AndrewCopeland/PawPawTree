@@ -1,0 +1,19 @@
+{
+  "name": "jskv",
+  "version": "1.0.0",
+  "description": "Javascript key value store",
+  "module": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tslint": "^5.12.1",
+    "typescript": "^3.3.3"
+  },
+  "dependencies": {
+    "node-fetch": "^3.2.3"
+  }
+}
