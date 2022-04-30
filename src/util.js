@@ -1,5 +1,7 @@
 var api = require("./api");
-
+const SECONDS_IN_A_DAY=86400
+const MIN_REWARDS=BigInt("10000000000000000000000000000000")
+global.crypto = require('crypto')
 
 const uuidv4 = () => {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
@@ -225,10 +227,12 @@ const getTribeInfo = async (tribeAddress, config, balance) => {
     const history = await api.getAccountHistory(tribeAddress, 1000)
     const delegators = await api.getDelegators(tribeAddress)
     let total = await tribeSize(delegators)
+    const totalTribeSize = total
     let totalRewards = balance
     if (balance === BigInt(0)) {
         totalRewards = await getRewards(history)
     }
+    const totalNumTribeMembers = Object.keys(delegators.delegators).length
     const now = (new Date().getTime() / 1000)
     const yesterday = now - (SECONDS_IN_A_DAY * config.payout_period_days)
     const sorted = await sortDelegators(delegators, config)
@@ -282,7 +286,11 @@ const getTribeInfo = async (tribeAddress, config, balance) => {
         end_time: yesterday,
         config: config,
         excluded_total_tribe_size: total,
+        total_tribe_size: totalTribeSize,
+        total_num_tribe_members: totalNumTribeMembers
     }
+
+    console.log("THIS IS TRIBE", tribe)
     
     let tribeMembers = {}
     for (const [address, amount] of Object.entries(sorted)) {
@@ -338,7 +346,10 @@ const sendRewards = async(tribeAddress, config, autoCalc, noSend) => {
 
     if (BigInt(payoutInfo.balance) < MIN_REWARDS && !autoCalc) {
         console.log(`Not sending out rewards for '${tribeAddress}' because balance is too low '${rawToPaw(payoutInfo.balance)}' `)
-        return
+        return {
+            error: true,
+            message: `Not sending out rewards for '${tribeAddress}' because balance is too low '${rawToPaw(payoutInfo.balance)}' `
+        }
     }
 
     let payout = BigInt(0)
@@ -362,7 +373,7 @@ const sendRewards = async(tribeAddress, config, autoCalc, noSend) => {
     let tribeMembersData = {}
 
     for (const [address, info] of Object.entries(tribeData.tribe_members)) {    
-        await sendAmount(address, config.payout_address, pawToRaw(info.average_payout.toString())).then(response => {
+        await api.sendAmount(address, config.payout_address, pawToRaw(info.average_payout.toString())).then(response => {
             console.log(response)
             memberInfo = info
 
