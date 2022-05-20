@@ -8,7 +8,8 @@ const NODE_URL="http://localhost:7046"
 const WALLET = "7E3A22B6DEAEB93E25E515A47D34A53D152B49356079180AF5513AEE4A0037D2"
 
 
-const MIN_DELEGATION=BigInt("10000000000000000000000000000000")
+// 10,000 PAW
+const MIN_DELEGATION=BigInt("1000000000000000000000000000000")
 const MIN_REWARDS=BigInt("10000000000000000000000000000000")
 const SECONDS_IN_A_DAY=86400
 
@@ -55,6 +56,19 @@ const getAccountHistory = async (address, count) => {
     return body
 }
 exports.getAccountHistory = getAccountHistory
+
+const getAccountBalance = async (address) => {
+    const response = await fetch(NODE_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            "action": "account_balance",
+            "account": address
+        })
+    })
+    const body = await response.json()
+    return body
+}
+exports.getAccountBalance = getAccountBalance
 
 const getRawAccountHistory = async (address, count, reverse) => {
     const response = await fetch(NODE_URL, {

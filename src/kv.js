@@ -21,10 +21,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.newKV = exports.setKV = exports.getKV = void 0;
 var fs = __importStar(require("fs"));
+const { NONAME } = require("dns");
 var paths = require("path");
+const { JsxEmit } = require("typescript");
 var makePath = function (dir, folder, key, version) {
-    return dir + "/" + folder + "/" + key + "/" + version.toString();
+    return makeDir(dir, folder, key)+ "/" + version.toString();
 };
+var makeDir = function(dir, folder, key) {
+    if (dir === undefined || dir === null) {
+        throw Error("ERROR: Invalid dir for kv")
+    }
+    if (folder === undefined || folder === null) {
+        throw Error("ERROR: Invalid folder for kv")
+    }
+    if (key === undefined || key === null) {
+        throw Error("ERROR: Invalid key for kv")
+    }
+    return dir + "/" + folder + "/" + key
+}
 var getNow = function () {
     return Math.round(Date.now() / 1000);
 };
@@ -54,3 +68,84 @@ var setKV = function (kv, key, content) {
     fs.writeFileSync(pathTimestamp, JSON.stringify(content));
 };
 exports.setKV = setKV;
+
+// this will return kv that is closest to the version
+// This return json objects with the content of the key and the key id
+// {
+//     "version": "1685421874257",
+//     "content": {
+            // "tribe": {...}
+//     }
+// }
+var findKV = function (kv, key, timestamp) {
+    const dir = makeDir(kv.dir, kv.folder, key)
+
+    if (!fs.existsSync(dir)) {
+        return {
+            version: null,
+            content: null,
+        }
+    }
+    const keys = fs.readdirSync(dir)
+
+
+    let foundKV = {
+        key: null,
+        timestamp: timestamp,
+        difference: 1000000000000000000,
+    }
+    for (let i in keys) {
+        const key = keys[i]
+        // skip latest
+        if (key === 'latest') {
+            continue
+        }
+        const kvTs = Number(key)
+        const difference = Math.abs(timestamp - kvTs)
+
+        if (difference < foundKV.difference) {
+            foundKV['key'] = key
+            foundKV['timestamp'] = kvTs
+            foundKV['difference'] = difference
+        }
+    }
+
+    if (foundKV.key === null) {
+        return {
+            version: null,
+            content: null,
+        }
+    }
+    return {
+        version: foundKV.timestamp,
+        content: getKV(kv, key, foundKV.timestamp),
+    }
+}
+exports.findKV = findKV
+
+
+var listKV = function(kv, key, toTimestamp, fromTimestamp) {
+    const dir = makeDir(kv.dir, kv.folder, key)
+    console.log("Attempting to get a list of keyvalues from ", fromTimestamp, " to ", toTimestamp, "dir=",dir)
+
+    if (!fs.existsSync(dir)) {
+        return {}
+    }
+    const timestamps = fs.readdirSync(dir)
+    let results = {}
+    for (let i in timestamps ) {
+        // skip latest key
+        if (timestamps[i] === "latest") {
+            continue
+        }
+        const timestamp = timestamps[i]
+        
+        // key resides within the from and to
+        if (Number(timestamp) >= fromTimestamp && Number(timestamp) <= toTimestamp) {
+            results[timestamp] = getKV(kv, key, timestamp)
+        }
+    }
+
+    return results
+}
+exports.listKV = listKV

@@ -1,1 +1,0 @@
-rsync -avzh /mnt/c/Users/andco/git/AndrewCopeland/PawPawTree/data/ root@bananonumber.cc:/home/github/pawpawtree/api

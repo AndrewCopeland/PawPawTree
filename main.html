@@ -81,7 +81,6 @@ const NODE_ACCOUNT="paw_11sao8crjdd91iifeipkri5xaes98mgqh9zwcaxup8g9gw3o1p9cknqg
 const EXCLUDE_ACCOUNTS=[
 ]
 const MIN_DELEGATION=BigInt("10000000000000000000000000000000")
-const MIN_REWARDS=BigInt("10000000000000000000000000000000")
 const SECONDS_IN_A_DAY=86400
 
 // NODE API
@@ -543,7 +542,7 @@ const sendRewards = async(tribeAddress, config, autoCalc, noSend) => {
     const payoutInfo = await getAccountInfo(config.payout_address)
     console.log(`payout info: ${JSON.stringify(payoutInfo)}`)
 
-    if (BigInt(payoutInfo.balance) < MIN_REWARDS && !autoCalc) {
+    if (BigInt(payoutInfo.balance) < config.MIN_REWARDS && !autoCalc) {
         console.log(`Not sending out rewards for '${tribeAddress}' because balance is too low '${rawToPaw(payoutInfo.balance)}' `)
         return
     }

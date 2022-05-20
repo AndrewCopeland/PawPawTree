@@ -1,0 +1,80 @@
+<html>
+    <!-- <header>Header</header> -->
+    <body>
+        <h3>Welcome...</h3>
+        <h3 id="client-address">I do not your PAW address - please login</h3>
+        <hr />
+        <h3>Send 100 PAW to the address to authenticate</h3>
+        <h3 id="wallet-auth-address"></h3>
+
+        <div id="wallet-qr-code"></div>
+        <hr/>
+        <div id="auth-status-header">Auth Status:</div>
+        <h3 id="auth-status">INACTIVE</h3>
+        <div id="auth-session-uuid-header">Auth Session ID:</div>
+        <h3 id="auth-session-uuid"></h3>
+        <div id="auth-session-token-header">Auth Token:</div>
+        <h3 id="auth-session-token"></h3>
+    </body>
+    <script src="https://unpkg.com/pawtils/dist/index.iife.min.js"></script>
+    <script>
+        const URL = "http://localhost:8000"
+        const startSession = async () => {
+            const url = URL + "/api/auth"
+            console.log(url)
+            const response = await fetch(url, {
+                method: "GET"
+            })
+
+            const body = await response.json()
+            const address = body.recipient
+
+            const qrData = pawtils.generateQRCodeData(address, 5);
+            const qrImageData = new ImageData(qrData.data, qrData.size, qrData.size);
+            const qrCode = document.createElement("canvas");
+            qrCode.width = qrCode.height = qrData.size;
+            qrCode.getContext("2d").putImageData(qrImageData, 0, 0);
+            qrCode.style.width = "10%";
+            qrCode.style.imageRendering = "pixelated";
+
+            let e = document.getElementById("wallet-auth-address")
+            e.innerText = address
+
+            e = document.getElementById("wallet-qr-code")
+            e.innerHTML = ""
+            e.appendChild(qrCode)
+
+            e = document.getElementById("auth-status")
+            e.innerHTML = "PENDING"
+
+            e = document.getElementById("auth-session-uuid")
+            e.innerHTML = body.session_uuid
+
+            listenSession(body.session_uuid)
+        }
+
+        const listenSession = async(sessionUUID) => {
+            const url = URL + "/api/auth/" + sessionUUID + "/listen"
+            const response = await fetch(url, {
+                method: "GET"
+            })
+            const body = await response.json()
+            e = document.getElementById("auth-status")
+            e1 = document.getElementById("auth-session-token")
+            if ('error' in body) {
+                e.innerText = "EXPIRED"
+                e1.innerText = body.error
+                return
+            }
+
+            e.innerText = "SUCCESS"
+            e1.innerText = body.id_token
+
+
+            e = document.getElementById("client-address")
+            e.innerText = body.account
+        }
+        startSession()
+
+    </script>
+</html>
