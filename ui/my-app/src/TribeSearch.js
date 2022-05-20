@@ -97,6 +97,14 @@ const tribes = [
 		"alias": "😼 Naked Cat ฅ^•ﻌ•^ฅ Tribe's 😼"
 	},
 	{
+		"votingweight": 2.447421556218584e+31,
+		"delegators": 0,
+		"uptime": 84.61538461538461,
+		"score": 0,
+		"account": "paw_1dogxxd8j8iy934x7cwmywsxop9ukfdabu3ezsdewg66ffomm1y3gefz4ucs",
+		"alias": "🐕 Naked Dog Tribe's (´•ᴥ•`)♥  🐕"
+	},
+	{
 		"votingweight": 1.3066540129156311e+36,
 		"delegators": 517,
 		"uptime": 86.44111239266948,

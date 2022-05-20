@@ -110,6 +110,15 @@ const TRIBE_CONFIG = {
         "min_account_amount": 10000,
         "special_accounts": {}
     },
+    "paw_1dogxxd8j8iy934x7cwmywsxop9ukfdabu3ezsdewg66ffomm1y3gefz4ucs": {
+        "name": "🐕 Naked Dog Tribe's (´•ᴥ•`)♥  🐕",
+        "payout_period_days": 1,
+        "tribe_tax": 0,
+        "payout_address": "paw_399cqjo171dybjqbuxfy4gzpq8qa1ou6uyqxqy9f17shab45fti7yiu79z6o",
+        "payout_address_7_day": "paw_3hze8p1ckiacshw49qjhhx5qzkhj4ug49jtewqtckzeg4u864h54kdz9xm38",
+        "min_account_amount": 10000,
+        "special_accounts": {}
+    },
     "paw_34xp9szeo6qf6k4j4nobp6xnpahgiwxsd5mmihxtagpzr1eshzq4gppqhnd5": {
         "name": " 🐎 Lucky Luck Horse  🐎 ",
         "payout_period_days": 1,
